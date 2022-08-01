@@ -1,123 +1,81 @@
 import './style.css'
 
+interface Position {
+    x:number;
+    y:number;
+    width:number;
+    vx:number;
+    vy:number;
+}
+
 //root 
 const canvas =<HTMLCanvasElement> document.getElementById('canvas')
 const ctx:CanvasRenderingContext2D|null = canvas.getContext('2d')
-console.log(canvas);
 
 // root 위치
 canvas.width = 1000;
 canvas.height = 500;
 
-
-interface Position {
-    x:number;
-    y:number;
-    width:number;
-    height:number;
-    color:string;
-    img : HTMLImageElement
-}
-
-//image
-const img1 = new Image();
-img1.src = '../src/assets/cactus.png'
-const img2 = new Image();
-img2.src = '../src/assets/dinosaur.png'
-
-
 class Item{
-    position;
+    point:Position;
     constructor(position:Position){
-      this.position = position
+       this.point = position
     }
     draw():void{
-        let { x, y, width, height, color ,img} = this.position;
-        
+        let { x , y ,width, } = this.point
         if(ctx != null){
-            ctx.fillStyle = color;
-            ctx.fillRect(x,y,width,height);
-            ctx.drawImage(img,x,y,width,height)
+                ctx.beginPath();
+                ctx.arc(x,y,width,0,2*Math.PI,true);
+                ctx.fillStyle = '#000';
+                ctx.stroke();
+                ctx.fill();
+                ctx.closePath();   
         }
     }  
 }
 
 
-
-let dinoPosition = {
-    x:10,
-    y:200,
-    width:50,
-    height:50,
-    color:'white ',
-    img:img2
-}
-
-const Dino = new Item(dinoPosition)
-
-Dino.draw()
-
-let jump = false;
-let timer = 0;
 let Disorders: Item[] = []
-let jumpTimer:number =  0;
 let animate: number;
 
+for (let i = 0; i < 10; i++) {
+    let roundWidth = Math.floor(Math.random() * 20) + 10;
+    let Vx = Math.floor(Math.random() * 10)  - 10;
+    let Vy = Math.floor(Math.random() * 10)  - 10;
+
+    let point:Position = {
+        width : roundWidth,
+        x : Math.floor(Math.random() * 800  ) + 100  ,
+        y : Math.floor(Math.random() * 300 )  + 100 ,
+        vx : Vx,
+        vy : Vy,
+    }
+    const Disorder = new Item(point)
+    Disorders.push(Disorder)
+}
+console.log(Disorders);
+
 const frameMovement = () =>{
-    animate = requestAnimationFrame(frameMovement);
-    timer++;
-    ctx?.clearRect(0,0,canvas.width,canvas.height)
-    
-    if(timer % 60 === 0){
-        let DisorderPosition = {
-            x:500,
-            y:200,
-            width:50,
-            height:50,
-            color:'white',
-            img:img1
+    ctx?.clearRect(0,0,canvas.width,canvas.height);
+   
+    Disorders.forEach((a,index ) =>{
+        a.draw()
+
+        a.point.y += a.point.vy;
+        a.point.x += a.point.vx;
+
+        if (a.point.y + a.point.vy >= canvas.height - a.point.width  || a.point.y + a.point.vy <= 0 + a.point.width) {
+            a.point.vy =-a.point.vy;
         }
-        const Disorder = new Item(DisorderPosition)
-        Disorders.push(Disorder)
-    } 
-    Disorders.forEach((a,i,o)=>{
-       if(a.position.x < 0){
-            o.splice(i,1)
-       }
-       a.position.x--;
-        physicalEngine(Dino , a)
-        a.draw();
+    
+        if (a.point.x + a.point.vx >=  canvas.width - a.point.width   || a.point.x + a.point.vx <= 0 + a.point.width ){
+            a.point.vx =-a.point.vx;
+        }
+
     })
-    
-    if(jump === true){
-        Dino.position.y--;
-        jumpTimer++;
-    }
-    if(jump === false){
-        if(Dino.position.y < 200) {
-            Dino.position.y++
-        }
-    }
-    if(jumpTimer > 100){
-        jump = false;
-        jumpTimer = 0;
-    }
-    Dino.draw()
+    animate = requestAnimationFrame(frameMovement);
+   
 }
 
 frameMovement()
 
-const physicalEngine = (dino:Item , disorder:Item) =>{
-    let xAxis =  disorder.position.x - (dino.position.x + dino.position.width);
-    let yAxis = disorder.position.y - (dino.position.y + dino.position.height);
-    if(xAxis < 0 && yAxis < 0){
-        ctx?.clearRect(0,0,canvas.width,canvas.height);
-        cancelAnimationFrame(animate)
-    }
- }
-
-document.addEventListener('keydown',(e) =>{
-    if(e.code === 'Space'){
-        jump = true
-    }
-})
