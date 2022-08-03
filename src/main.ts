@@ -87,7 +87,7 @@ for (let i = 0; i < 10; i++) {
         vx : Vx ,
         vy : Vy,
         color:color[i],
-        weight:5,
+        weight:1,
     }
 
     const Disorder = new Item(point)
@@ -156,7 +156,10 @@ const frameMovement = () =>{
 
                         a1.update(x, y); 
                         a2.update(x_, y_);
-                }
+                   }
+                   
+                  
+                
             }
            
         }
