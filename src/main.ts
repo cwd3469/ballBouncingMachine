@@ -6,19 +6,14 @@ interface Position {
     width:number;
     vx:number;
     vy:number;
-    color:string;
-    weight:number;
+    speed:number;
 }
 
-//root 
 const canvas =<HTMLCanvasElement> document.getElementById('canvas')
 const ctx:CanvasRenderingContext2D|null = canvas.getContext('2d')
 
-// root 위치
 canvas.width = 1000;
 canvas.height = 500;
-
-
 class Item {
     point:Position;
     constructor(position:Position){
@@ -26,11 +21,11 @@ class Item {
 
     }
     draw():void{
-        let { x , y ,width,color } = this.point
+        let { x , y ,width } = this.point
         if(ctx != null){
                 ctx.beginPath();
                 ctx.arc(x,y,width,0,2*Math.PI,true);
-                ctx.fillStyle = color;
+                ctx.fillStyle = '#000';
                 ctx.fill();
         }
     }
@@ -66,28 +61,28 @@ class Item {
 
 
 let Disorders: Item[] = []
-let animate: number;
 
-const color = ['red' , 'blue' , 'pea green' , 'teal' , 'indigo' , 'pink' , 'lime' ,'purple' , ' blue gray' , 'coral' , 'mustard' ,'orange' , '#eee' , 'aqua' , 'brown' , 'peach' , 'maroon' , 'gray' ,'pink']
+function randomEvent(min:number, max:number) :number{
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
+const number = randomEvent(10 , 20) ;
 
-
-for (let i = 0; i < 10; i++) {
-
-    let roundWidth = Math.floor(Math.random() * 20) + 10;
-    let Vx = Math.floor(Math.random() * 4)+1 ;
-    let Vy = Math.floor(Math.random() * 4)+1 ;
-    let xPoint = Math.floor(Math.random() * (canvas.width - roundWidth*2) + roundWidth );
-    let yPoint = Math.floor(Math.random() * (canvas.height - roundWidth*2)+ roundWidth );
+for (let i = 0; i < number; i++) {
+    const roundWidth = randomEvent(10 , 20)
+    const xPoint =  Math.floor(Math.random() * (canvas.width - roundWidth*2) + roundWidth ); 
+    const yPoint = Math.floor(Math.random() * (canvas.height - roundWidth*2)+ roundWidth );
+    const speed = randomEvent(2 , 4)
+    const directionX = -speed + (Math.random() * speed*2);
+    const directionY = -speed + (Math.random() * speed*2);
 
     let point:Position = {
         width : roundWidth,
         x : xPoint,
         y : yPoint,
-        vx : Vx ,
-        vy : Vy,
-        color:color[i],
-        weight:1,
+        vx : directionX ,
+        vy : directionY,
+        speed:1,
     }
 
     const Disorder = new Item(point)
@@ -122,10 +117,10 @@ const frameMovement = () =>{
                     moveBetween: Math.sqrt(distancX + distancY),
                     between:a2.point.width + a1.point.width
                 }
-                if(after.moveBetween <= after.between ){
+                if(after.moveBetween <= after.between  && after.moveBetween - after.between > -5){
                     const r = Math.atan2(a1.point.y - a2.point.y, a1.point.x - a2.point.x);
-                    const m1 = a1.point.weight;
-                    const m2 = a2.point.weight;
+                    const m1 = a1.point.speed;
+                    const m2 = a2.point.speed;
                     const v1 = a1.vector();
                     const v2 = a2.vector();
                     const t1 = a1.theta();
@@ -157,16 +152,13 @@ const frameMovement = () =>{
                         a1.update(x, y); 
                         a2.update(x_, y_);
                    }
-                   
-                  
-                
             }
            
         }
         a1.acc()
      }
 
-    animate = requestAnimationFrame(frameMovement);
+     requestAnimationFrame(frameMovement);
 }
 
 frameMovement()
